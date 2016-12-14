@@ -1,4 +1,5 @@
 import os
+import glob
 import ycm_core
 
 # These are the compilation flags that will be used in case there's no
@@ -41,8 +42,8 @@ flags = [
 '/usr/include/c++/4.2.1',
 '-isystem',
 '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include',
-'-isystem',
-'/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include',
+#'-isystem',
+#'/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include',
 '-isystem',
 '/System/Library/Frameworks',
 '-isystem',
@@ -136,10 +137,16 @@ def IsHeaderFile( filename ):
   extension = os.path.splitext( filename )[ 1 ]
   return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
 
-def AddKernelSourceFlags():
+def AddOSRelatedFlags():
     uname = os.uname()
     if uname[0] == "Linux":
         return ['-isystem', "/usr/src/linux-headers-" + uname[2].rstrip("-generic") + "/include"]
+    elif uname[0] == "Darwin":
+        clang_flags = []
+        clang_include_dirs = glob.glob("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*")
+        for dir in clang_include_dirs:
+            clang_flags += ['-isystem', dir+"/include"]
+        return clang_flags
     else:
         return []
 
@@ -150,11 +157,11 @@ def AddFlagsForLanguageType(filename, flags):
     extra_flags = []
 
     if extension in ['.h']:
-        extra_flags = various_languages_flags['h'] + AddKernelSourceFlags()
+        extra_flags = various_languages_flags['h'] + AddOSRelatedFlags()
     if extension in ['.c']:
-        extra_flags = various_languages_flags['c'] + AddKernelSourceFlags()
+        extra_flags = various_languages_flags['c'] + AddOSRelatedFlags()
     elif extension in ['.hpp', '.cpp', '.cxx', '.cc', '.C']:
-        extra_flags = various_languages_flags['cpp'] + AddKernelSourceFlags()
+        extra_flags = various_languages_flags['cpp'] + AddOSRelatedFlags()
 
     return flags + extra_flags
 
