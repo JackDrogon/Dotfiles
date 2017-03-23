@@ -41,6 +41,8 @@ flags = [
 '-isystem',
 '/usr/include/c++/4.2.1',
 '-isystem',
+'/usr/include/c++/6',
+'-isystem',
 '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include',
 #'-isystem',
 #'/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/7.0.2/include',
@@ -138,17 +140,20 @@ def IsHeaderFile( filename ):
   return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
 
 def AddOSRelatedFlags():
+    _flag = []
     uname = os.uname()
     if uname[0] == "Linux":
-        return ['-isystem', "/usr/src/linux-headers-" + uname[2].rstrip("-generic") + "/include"]
+        linux_kernel_flag = ['-isystem', "/usr/src/linux-headers-" + uname[2].rstrip("-generic") + "/include"]
+        _flag += linux_kernel_flag
+        linuxbrew_path = os.getenv("HOME")+"/.linuxbrew"
+        if os.path.exists(linuxbrew_path + "/include"):
+            _flag += ['-I', linuxbrew_path+"/include"]
     elif uname[0] == "Darwin":
-        clang_flags = []
         clang_include_dirs = glob.glob("/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*")
         for dir in clang_include_dirs:
-            clang_flags += ['-isystem', dir+"/include"]
-        return clang_flags
-    else:
-        return []
+            _flags += ['-isystem', dir+"/include"]
+
+    return _flag
 
 
 def AddFlagsForLanguageType(filename, flags):
