@@ -33,6 +33,8 @@ flags = [
 # This path will only work on OS X, but extra paths that don't exist are not
 # harmful
 '-isystem',
+'/usr/include/c++/5',
+'-isystem',
 '/usr/include',
 '-isystem',
 '/usr/local/include',
